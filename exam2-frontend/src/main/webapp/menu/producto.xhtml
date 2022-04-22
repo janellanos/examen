@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="/WEB-INF/template/layout.xhtml">
+
+	<ui:define name="title">Gestión de Productos</ui:define>
+	<ui:define name="content">
+		<h:form id="frm" update="growl">
+			<p:growl id="growl" sticky="false" life="5000" showDetail="false"
+				autoUpdate="true" />
+			<div class="card crud-demo">
+				<p:toolbar>
+					<p:toolbarGroup>
+						<p:commandButton value="Nuevo" icon="pi pi-plus"
+							actionListener="#{productoBean.openNew}"
+							update=":frm:manage-product-content"
+							oncomplete="PF('manageProductDialog').show()"
+							styleClass="ui-button-success" style="margin-right: .5rem">
+							<p:resetInput target=":frm:manage-product-content" />
+						</p:commandButton>
+						<p:commandButton id="delete-products-button"
+							value="#{productoBean.deleteButtonMessage}" icon="pi pi-trash"
+							actionListener="#{productoBean.deleteSelectedProducts}"
+							styleClass="ui-button-danger"
+							disabled="#{!productoBean.hasSelectedProducts()}" update="@this">
+							<p:confirm header="Confirmation"
+								message="Delete the selected products?"
+								icon="pi pi-exclamation-triangle" />
+						</p:commandButton>
+					</p:toolbarGroup>
+				</p:toolbar>
+				<div style="padding: 20px;">
+					<p:inputText id="txtBuscar" value="#{productoBean.idBuscar}"
+						placeholder="Ingrese Id para buscar" />
+					<p:commandButton value="Buscar (TODO: Codificar)"
+						icon="pi pi-search" actionListener="#{productoBean.buscarPorId}"
+						update=":frm:manage-product-content"
+						styleClass="ui-button-success">
+					</p:commandButton>
+
+				</div>
+
+				<p:dataTable id="dt-products" widgetVar="dtProducts" var="product"
+					value="#{productoBean.registros}" reflow="true"
+					styleClass="products-table"
+					selection="#{productoBean.selectedProducts}" rowKey="#{product.id}"
+					paginator="true" rows="10" rowSelectMode="add"
+					paginatorPosition="bottom">
+
+
+					<p:ajax event="rowSelect" update=":frm:delete-products-button" />
+					<p:ajax event="rowUnselect" update=":frm:delete-products-button" />
+					<p:ajax event="rowSelectCheckbox"
+						update=":frm:delete-products-button" />
+					<p:ajax event="rowUnselectCheckbox"
+						update=":frm:delete-products-button" />
+					<p:ajax event="toggleSelect" update=":frm:delete-products-button" />
+
+					<p:column selectionMode="multiple" exportable="false"
+						style="width:50px;"></p:column>
+
+					<p:column headerText="id">
+						<h:outputText value="#{product.id}" />
+					</p:column>
+					<p:column headerText="Nombre">
+						<h:outputText value="#{product.nombre}" />
+					</p:column>
+					
+					<p:column headerText="Categoria">
+						<h:outputText value="#{product.categoria.nombre}" />
+					</p:column>
+
+					<p:column exportable="false" style="width:120px;">
+						<p:commandButton icon="pi pi-pencil"
+							update=":frm:manage-product-content"
+							oncomplete="PF('manageProductDialog').show()"
+							styleClass="edit-button rounded-button ui-button-success"
+							process="@this">
+							<f:setPropertyActionListener value="#{product}"
+								target="#{productoBean.selectedProduct}" />
+							<p:resetInput target=":frm:manage-product-content" />
+						</p:commandButton>
+						<p:commandButton class="ui-button-warning rounded-button"
+							icon="pi pi-trash" process="@this"
+							oncomplete="PF('deleteProductDialog').show()">
+							<f:setPropertyActionListener value="#{product}"
+								target="#{productoBean.selectedProduct}" />
+						</p:commandButton>
+					</p:column>
+
+				</p:dataTable>
+
+				<p:dialog header="Producto" showEffect="fade" modal="true"
+					widgetVar="manageProductDialog" responsive="true">
+					<p:outputPanel id="manage-product-content" class="ui-fluid">
+						<p:outputPanel
+							rendered="#{not empty productoBean.selectedProduct}">
+							<div class="p-field">
+								<p:outputLabel for="txtNombre">Nombre</p:outputLabel>
+								<p:inputText id="txtNombre"
+									value="#{productoBean.selectedProduct.nombre}" required="true" />
+							</div>
+
+							<div class="p-field">
+								<p:outputLabel for="categoria" class="form-label"
+									value="Categoria" />
+								<p:selectOneMenu filter="true" id="categoria"
+									value="#{productoBean.nombre}" required="true">
+									<f:selectItem itemLabel="Seleccione..." itemValue="#{null}" />
+									<f:selectItems value="#{productoBean.categorias}" var="Item"
+										itemValue="#{Item.nombre}" itemLabel="#{Item.nombre}" />
+									<p:ajax event="change" update="@this" />
+								</p:selectOneMenu>
+							</div>
+
+
+						</p:outputPanel>
+					</p:outputPanel>
+
+					<f:facet name="footer">
+						<p:commandButton value="Guardar" icon="pi pi-check"
+							actionListener="#{productoBean.saveProduct}"
+							update="manage-product-content"
+							process="manage-product-content @this" />
+						<p:commandButton value="Cancel" icon="pi pi-times"
+							onclick="PF('manageProductDialog').hide()"
+							class="ui-button-secondary" />
+					</f:facet>
+				</p:dialog>
+
+
+
+
+
+				<p:confirmDialog widgetVar="deleteProductDialog" showEffect="fade"
+					width="300" message="Delete the product?" header="Confirm"
+					severity="warn">
+					<p:commandButton value="Yes" icon="pi pi-check"
+						actionListener="#{productoBean.deleteProduct}" process="@this"
+						oncomplete="PF('deleteProductDialog').hide()" />
+					<p:commandButton value="No" type="button"
+						styleClass="ui-button-secondary" icon="pi pi-times"
+						onclick="PF('deleteProductDialog').hide()" />
+				</p:confirmDialog>
+
+				<p:confirmDialog global="true" showEffect="fade" width="300">
+					<p:commandButton value="Yes" type="button"
+						styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+					<p:commandButton value="No" type="button"
+						styleClass="ui-confirmdialog-no ui-button-secondary"
+						icon="pi pi-times" />
+				</p:confirmDialog>
+			</div>
+			<script>
+				//<![CDATA[
+
+				//]]>
+			</script>
+		</h:form>
+	</ui:define>
+</ui:composition>
+</html>

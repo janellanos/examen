@@ -1,0 +1,22 @@
+/*calendario */
+.p-datepicker {
+    width: 100% !important;
+}
+.ui-inputfield {
+    width: 100% !important;
+}
+.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only{
+border-color: #007bff !important;
+}
+/*
+.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only{
+	color: #336699 !important;
+background-color: #369 !important;
+border-color: #007bff !important;
+
+} */
+
+/*Asterisk color*/
+.ui-outputlabel .ui-outputlabel-rfi {
+    color: red;
+}

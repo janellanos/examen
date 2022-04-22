@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+<h:head>
+	<title>Login</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="stylesheet"
+		href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="/resources/plugins-web/css/login.css" />
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css" />
+
+</h:head>
+
+<h:body>
+	<h:form prependId="false">
+		<div class="container" style="margin-top: 100px;">
+			<div class="row">
+				<div class="col-md-11 mt-60 mx-md-auto">
+					<div class="login-box bg-white pl-lg-5 pl-0">
+						<div class="row no-gutters align-items-center">
+							<div class="col-md-6">
+								<div class="form-wrap bg-white">
+									<div class="d-flex justify-content-center">
+										<div class="brand_logo_container">
+											<img src="/resources/images/logo_lrg_200.png"
+												class="brand_logo" alt="Logo" />
+										</div>
+									</div>
+									<div style="margin-top: 90px;"></div>
+									<h4 class="btm-sep pb-3" style="text-align: center;">Inmobiliaria</h4>
+									<div class="row">
+										<div class="col-12">
+											<div class="form-group position-relative">
+												<span class="zmdi zmdi-account"></span>
+												<p:inputText id="username" class="form-control"
+													placeholder="Usuario" />
+											</div>
+										</div>
+										<div class="col-12">
+											<div class="form-group position-relative">
+												<span class="zmdi zmdi-email"></span>
+												<p:password id="password" class="form-control"
+													placeholder="Contraseña" />
+											</div>
+										</div>
+										<div class="col-12 text-lg-right">
+											<a href="#" class="c-black">Olvidó la constraseña ?</a>
+										</div>
+										
+										
+										<div class="col-12 mt-30">
+											<a href="escritorio.xhtml" class="btn btn-blue">INGRESAR</a>
+										</div>
+										
+										
+										
+										
+										<div class="col-12 mt-30"
+											style="margin-top: 10px; text-align: center;">
+											<c:if test="${!empty param.error}">
+												<!-- 
+												<div class="alert alert-danger">${SPRING_SECURITY_LAST_EXCEPTION.message}</div>
+												 -->
+												<div class="alert alert-danger">Usuario o contraseña
+													no válido</div>
+											</c:if>
+											<p:outputLabel value="Sesión abierto en otro navegador"
+												styleClass="red"
+												rendered="${!empty param['invalid-session']}" />
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="content text-center">
+									<div class="border-bottom pb-5 mb-5" style="margin-top: 50px;">
+										<h3 class="c-black">EXAMEN DE RECUPERACION</h3>
+									</div>
+								
+									<div class="border-bottom pb-5 mb-5" style="margin-top: 50px;">
+										<h5 class="c-black">Janneth Llanos </h5>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</h:form>
+</h:body>
+</html>

@@ -1,0 +1,41 @@
+/*calendario */
+.p-datepicker {
+	width: 100% !important;
+}
+
+.ui-inputfield {
+	width: 100% !important;
+}
+
+.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only
+	{
+	border-color: #007bff !important;
+}
+/*
+.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only{
+	color: #336699 !important;
+background-color: #369 !important;
+border-color: #007bff !important;
+
+} */
+
+/*Asterisk color*/
+.ui-outputlabel .ui-outputlabel-rfi {
+	color: red;
+}
+
+/* space between label and textbox*/
+.form-label {
+	margin-top: 10px;
+	margin-bottom: -10px;
+}
+/*quita negrita de  los labels*/
+/*label:not(.form-check-label):not(.custom-file-label) {
+    font-weight: 100 !important;
+}
+*/
+/*****/
+.p-field {
+	margin-bottom: 0rem;
+}
+

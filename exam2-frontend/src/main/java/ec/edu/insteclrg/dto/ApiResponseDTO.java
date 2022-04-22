@@ -1,0 +1,20 @@
+package ec.edu.insteclrg.dto;
+
+import java.io.Serializable;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class ApiResponseDTO<T> implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
+
+	private boolean success;
+	
+	private T result;
+	
+	private String error;
+
+}

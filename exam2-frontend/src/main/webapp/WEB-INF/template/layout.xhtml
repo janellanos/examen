@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<title>FrontEnd 1.0.0</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<!-- Font Awesome Icons -->
+	<link rel="stylesheet"
+		href="/resources/adminlte-31/plugins/fontawesome-free/css/all.min.css" />
+	<!-- IonIcons -->
+	<link rel="stylesheet"
+		href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" />
+	<!-- Theme style -->
+	<link rel="stylesheet"
+		href="/resources/adminlte-31/dist/css/adminlte.min.css" />
+
+	<!-- Bootstrap -->
+	<script
+		src="/resources/adminlte-31/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<!-- AdminLTE -->
+	<script src="/resources/adminlte-31/dist/js/adminlte.js"></script>
+
+	<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+	<script>
+		$.widget.bridge('uibutton', $.ui.button)
+	</script>
+
+
+	<ui:insert name="css"></ui:insert>
+	<ui:insert name="javascript"></ui:insert>
+
+
+</h:head>
+<h:body class="hold-transition sidebar-mini">
+	<h:outputStylesheet name="plugins-web/css/webapp-wpadmin.css" />
+	<f:metadata>
+	</f:metadata>
+	<p:dialog widgetVar="statusDialog" modal="true" draggable="false"
+		closable="false" resizable="false" showHeader="false">
+		<p:graphicImage url="/resources/images/loadingbar.gif" />
+	</p:dialog>
+	<div class="wrapper">
+		<h:form>
+			<p:growl id="growl" sticky="false" life="5000" showDetail="false"
+				autoUpdate="true" />
+		</h:form>
+		<aside class="main-sidebar sidebar-dark-primary elevation-4">
+		<!-- Sidebar -->
+		<div class="sidebar">
+			<!-- Sidebar Menu -->
+			<nav class="mt-2">
+			<ul class="nav nav-pills nav-sidebar flex-column"
+				data-widget="treeview" role="menu" data-accordion="false">
+				<li class="nav-item menu-open"><a href="#" class="nav-link">
+						<i class="nav-icon fas fa-cog"></i>
+						<p>
+							Menú<i class="fas fa-angle-left right"></i>
+						</p>
+				</a>
+					<ul class="nav nav-treeview">
+					<li class="nav-item"><a href="../menu/escritorio.xhtml"
+							class="nav-link"> <i class="fas fa-globe nav-icon"></i>
+								<p>Escritorio</p>
+						</a></li>
+						<li class="nav-item"><a href="../menu/categoria.xhtml"
+							class="nav-link"> <i class="fas fa-globe nav-icon"></i>
+								<p>Categorías</p>
+						</a></li>
+						<li class="nav-item"><a href="../menu/producto.xhtml"
+							class="nav-link"> <i class="fas fa-globe nav-icon"></i>
+								<p>Productos</p>
+						</a></li>
+						<li class="nav-item"><a href="../menu/servicio.xhtml"
+							class="nav-link"> <i class="fas fa-globe nav-icon"></i>
+								<p>Servicios</p>
+						</a></li>
+
+					</ul></li>
+				<li class="nav-header"><a class="brand-link"
+					style="padding: 0;"></a></li>
+			</ul>
+			</nav>
+			<!-- /.sidebar-menu -->
+		</div>
+		<!-- /.sidebar --> </aside>
+		<!-- Content Wrapper. Contains page content -->
+		<div class="content-wrapper">
+			<!-- Content Header (Page header) -->
+			<div class="content-header">
+				<div class="container-fluid">
+					<div class="row mb-2">
+						<div class="col-sm-12">
+							<h1 class="m-0">
+								<ui:insert name="title">
+									<ui:include src="title.xhtml" />
+								</ui:insert>
+							</h1>
+						</div>
+						<!-- /.col -->
+					</div>
+					<!-- /.row -->
+				</div>
+				<!-- /.container-fluid -->
+			</div>
+			<!-- /.content-header -->
+
+			<!-- Main content -->
+			<div class="content">
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-lg-12">
+							<div class="card bg-gradient-light">
+								<div class="card-body" style="display: block; padding: 0px;">
+									<p:panel>
+										<ui:insert name="content">
+											<ui:include src="content.xhtml" />
+										</ui:insert>
+									</p:panel>
+									<p:ajaxStatus
+										oncomplete="setTimeout(function() { $('.ui-messages').slideUp(); }, 5000)" />
+								</div>
+							</div>
+
+						</div>
+					</div>
+					<!-- /.row -->
+				</div>
+				<!-- /.container-fluid -->
+			</div>
+			<!-- /.content -->
+		</div>
+		<!-- /.content-wrapper -->
+
+		<ui:insert name="footer">
+			<ui:include src="footer.xhtml" />
+		</ui:insert>
+
+	</div>
+</h:body>
+</html>
