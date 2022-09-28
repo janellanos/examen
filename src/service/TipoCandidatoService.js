@@ -1,18 +1,18 @@
 import axios from "axios";
 
-const url = "http://localhost:9090/api/v1.0/candidato";
+const url = "http://localhost:9090/api/v1.0/tipoCandidato/";
 
-export class CandidatoService {
-    getCandidato() {
+export class TipoCandidatoService {
+    getTipoCandidato() {
         return axios.get(url).then((res) => res.data.result);
     }
-    postCandidato(data) {
+    postTipoCandidato(data) {
         return axios.post(url, data);
     }
-    updateCandidato(data) {
+    updateTipoCandidato(data) {
         return axios.put(url, data);
     }
-    deleteCandidato(data) {
+    deleteTipoCandidato(data) {
         return axios.delete(url, data);
     }
 }

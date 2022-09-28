@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 export const AppTopbar = (props) => {
+    const token = localStorage.getItem("token");
     return (
         <div className="layout-topbar">
             <Link to="/" className="layout-topbar-logo">
@@ -9,13 +10,17 @@ export const AppTopbar = (props) => {
                 <span>VOTO ELECTRONICO</span>
             </Link>
 
-            <button type="button" className="p-link  layout-menu-button layout-topbar-button" onClick={props.onToggleMenuClick}>
-                <i className="pi pi-bars" />
-            </button>
+            {token !== "" && token !== null && (
+                <button type="button" className="p-link  layout-menu-button layout-topbar-button" onClick={props.onToggleMenuClick}>
+                    <i className="pi pi-bars" />
+                </button>
+            )}
 
-            <button type="button" className="p-link layout-topbar-menu-button layout-topbar-button" onClick={props.onMobileTopbarMenuClick}>
-                <i className="pi pi-ellipsis-v" />
-            </button>
+            {token !== "" && token !== null && (
+                <button type="button" className="p-link layout-topbar-menu-button layout-topbar-button" onClick={props.onMobileTopbarMenuClick}>
+                    <i className="pi pi-ellipsis-v" />
+                </button>
+            )}
         </div>
     );
 };

@@ -4,11 +4,13 @@ const url = "http://localhost:9090/api/v1.0/institucion/";
 
 export class InstitucionService {
     getInstituciones(ruc, state) {
+    //    console.log("xxxxxx")
         return axios
-            .get(url + ruc)
+            .get(url)
             .then((res) => {
                 state(res.data.result);
                 const data = res.data.result;
+                console.log(data)
                 return data;
             })
             .catch(function (error) {

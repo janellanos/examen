@@ -1,40 +1,45 @@
-import React, { useState, useEffect, useRef } from 'react';
-import classNames from 'classnames';
-import { Route, useLocation } from 'react-router-dom';
-import { CSSTransition } from 'react-transition-group';
+import React, { useState, useEffect, useRef } from "react";
+import classNames from "classnames";
+import { Route, Switch, useHistory, useLocation } from "react-router-dom";
+import { CSSTransition } from "react-transition-group";
 
-import { AppTopbar } from './AppTopbar';
-import { AppFooter } from './AppFooter';
-import { AppMenu } from './AppMenu';
-import { AppConfig } from './AppConfig';
+import { AppTopbar } from "./AppTopbar";
+import { AppFooter } from "./AppFooter";
+import { AppMenu } from "./AppMenu";
+import { AppConfig } from "./AppConfig";
 
-import Dashboard from './components/Dashboard';
+import Dashboard from "./components/Dashboard";
 
-import Crud from './pages/Crud';
-import CrudCuidad from './pages/CrudCuidad'
-import CrudSexo from './pages/CrudSexo';
-import CrudVotantes from './pages/CrudVotantes';
-import CrudCandidato from './pages/CrudCandidato';
+import Crud from "./pages/Crud";
+import CrudCuidad from "./pages/CrudCuidad";
+import CrudSexo from "./pages/CrudSexo";
+import CrudCandidato from "./pages/CrudCandidato";
+import CrudTipoInstituto from "./pages/CrudTipoInstituto";
+import Lista from "./pages/Lista";
 
-import PrimeReact from 'primereact/api';
-import { Tooltip } from 'primereact/tooltip';
+import PrimeReact from "primereact/api";
+import { Tooltip } from "primereact/tooltip";
 import { InstitucionService } from "./service/InstitucionService";
 
-import 'primereact/resources/primereact.css';
-import 'primeicons/primeicons.css';
-import 'primeflex/primeflex.css';
-import 'prismjs/themes/prism-coy.css';
-import './assets/demo/flags/flags.css';
-import './assets/demo/Demos.scss';
-import './assets/layout/layout.scss';
-import './App.scss';
-
+import "primereact/resources/primereact.css";
+import "primeicons/primeicons.css";
+import "primeflex/primeflex.css";
+import "prismjs/themes/prism-coy.css";
+import "./assets/demo/flags/flags.css";
+import "./assets/demo/Demos.scss";
+import "./assets/layout/layout.scss";
+import "./App.scss";
+import CrudUsuarios from "./pages/CrudUsuarios";
+import Login from "./components/Login";
+import Clear from "./components/RemoveLogin";
+import Voto from "./pages/Voto";
+import Resultados from "./pages/Resultados";
 
 const App = () => {
     const [instituto, setInstituto] = useState({});
-    const [layoutMode, setLayoutMode] = useState('static');
-    const [layoutColorMode, setLayoutColorMode] = useState('light')
-    const [inputStyle, setInputStyle] = useState('outlined');
+    const [layoutMode, setLayoutMode] = useState("static");
+    const [layoutColorMode, setLayoutColorMode] = useState("light");
+    const [inputStyle, setInputStyle] = useState("outlined");
     const [ripple, setRipple] = useState(true);
     const [staticMenuInactive, setStaticMenuInactive] = useState(false);
     const [overlayMenuActive, setOverlayMenuActive] = useState(false);
@@ -42,17 +47,13 @@ const App = () => {
     const [mobileTopbarMenuActive, setMobileTopbarMenuActive] = useState(false);
     const copyTooltipRef = useRef();
     const location = useLocation();
+    const token = localStorage.getItem("token");
+    const rol = localStorage.getItem("rol");
 
     PrimeReact.ripple = true;
 
     let menuClick = false;
     let mobileTopbarMenuClick = false;
-
-
-    useEffect(() => {
-        const institucion = new InstitucionService();
-        institucion.getInstituciones("ruc", setInstituto);
-    }, []);
 
     useEffect(() => {
         if (mobileMenuActive) {
@@ -68,20 +69,20 @@ const App = () => {
 
     const onInputStyleChange = (inputStyle) => {
         setInputStyle(inputStyle);
-    }
+    };
 
     const onRipple = (e) => {
         PrimeReact.ripple = e.value;
-        setRipple(e.value)
-    }
+        setRipple(e.value);
+    };
 
     const onLayoutModeChange = (mode) => {
-        setLayoutMode(mode)
-    }
+        setLayoutMode(mode);
+    };
 
     const onColorModeChange = (mode) => {
-        setLayoutColorMode(mode)
-    }
+        setLayoutColorMode(mode);
+    };
 
     const onWrapperClick = (event) => {
         if (!menuClick) {
@@ -95,136 +96,168 @@ const App = () => {
 
         mobileTopbarMenuClick = false;
         menuClick = false;
-    }
+    };
 
     const onToggleMenuClick = (event) => {
         menuClick = true;
 
         if (isDesktop()) {
-            if (layoutMode === 'overlay') {
+            if (layoutMode === "overlay") {
                 if (mobileMenuActive === true) {
                     setOverlayMenuActive(true);
                 }
 
                 setOverlayMenuActive((prevState) => !prevState);
                 setMobileMenuActive(false);
-            }
-            else if (layoutMode === 'static') {
+            } else if (layoutMode === "static") {
                 setStaticMenuInactive((prevState) => !prevState);
             }
-        }
-        else {
+        } else {
             setMobileMenuActive((prevState) => !prevState);
         }
-
         event.preventDefault();
-    }
+    };
 
     const onSidebarClick = () => {
-        menuClick = true;
-    }
+        setStaticMenuInactive((prevState) => !prevState);
+
+        menuClick = false;
+    };
 
     const onMobileTopbarMenuClick = (event) => {
         mobileTopbarMenuClick = true;
 
         setMobileTopbarMenuActive((prevState) => !prevState);
         event.preventDefault();
-    }
+    };
 
     const onMobileSubTopbarMenuClick = (event) => {
         mobileTopbarMenuClick = true;
 
         event.preventDefault();
-    }
+    };
 
     const onMenuItemClick = (event) => {
         if (!event.item.items) {
             setOverlayMenuActive(false);
             setMobileMenuActive(false);
         }
-    }
+    };
     const isDesktop = () => {
         return window.innerWidth >= 992;
-    }
+    };
 
     const menu = [
         {
-            label: 'Home',
-            items: [{
-                label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/'
-            }]
+            label: "Home",
+            items: [
+                {
+                    label: "Dashboard",
+                    icon: "pi pi-fw pi-home",
+                    to: "/dashboard",
+                },
+            ],
         },
         {
-            label: 'Pages', icon: 'pi pi-fw pi-clone',
+            label: "Pages",
+            icon: "pi pi-fw pi-clone",
             items: [
-                { label: 'Provincia', icon: 'pi pi-fw pi-user-edit', to: '/crud-provincia' },
-                { label: 'Ciudad', icon: 'pi pi-fw pi-user-edit', to: '/crud-cuidad' },
-                { label: 'Sexo', icon: 'pi pi-fw pi-user-edit', to: '/crud-sexo' },
-                { label: 'Votante', icon: 'pi pi-fw pi-user-edit', to: '/crud-votantes' },
-                { label: 'Candidato', icon: 'pi pi-fw pi-user-edit', to: '/crud-candidato' },
-            ]
+                { label: "Provincia", icon: "pi pi-fw pi-user-edit", to: "/crud-provincia" },
+                { label: "Ciudad", icon: "pi pi-fw pi-user-edit", to: "/crud-cuidad" },
+                { label: "Sexo", icon: "pi pi-fw pi-user-edit", to: "/crud-sexo" },
+                { label: "Usuario", icon: "pi pi-fw pi-user-edit", to: "/crud-usuario" },
+                { label: "Candidato", icon: "pi pi-fw pi-user-edit", to: "/crud-candidato" },
+                { label: "Tipo Institucion", icon: "pi pi-fw pi-user-edit", to: "/crud-tipoInstitucion" },
+                { label: "Lista", icon: "pi pi-fw pi-user-edit", to: "/crud-lista" },
+                { label: "Voto", icon: "pi pi-fw pi-user-edit", to: "/voto" },
+                { label: "Resultados", icon: "pi pi-fw pi-user-edit", to: "/resultados" },
+                { label: "Salir", icon: "pi pi-fw pi-user-edit", to: "/salir" },
+            ],
         },
-            ];
+    ];
+    const menu2 = [
+        {
+            label: "Home",
+            items: [
+                {
+                    label: "Dashboard",
+                    icon: "pi pi-fw pi-home",
+                    to: "/dashboard",
+                },
+            ],
+        },
+        {
+            label: "Pages",
+            icon: "pi pi-fw pi-clone",
+            items: [
+                { label: "Voto", icon: "pi pi-fw pi-user-edit", to: "/voto" },
+                { label: "Salir", icon: "pi pi-fw pi-user-edit", to: "/salir" },
+            ],
+        },
+    ];
 
     const addClass = (element, className) => {
-        if (element.classList)
-            element.classList.add(className);
-        else
-            element.className += ' ' + className;
-    }
+        if (element.classList) element.classList.add(className);
+        else element.className += " " + className;
+    };
 
     const removeClass = (element, className) => {
-        if (element.classList)
-            element.classList.remove(className);
-        else
-            element.className = element.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
-    }
+        if (element.classList) element.classList.remove(className);
+        else element.className = element.className.replace(new RegExp("(^|\\b)" + className.split(" ").join("|") + "(\\b|$)", "gi"), " ");
+    };
 
-    const wrapperClass = classNames('layout-wrapper', {
-        'layout-overlay': layoutMode === 'overlay',
-        'layout-static': layoutMode === 'static',
-        'layout-static-sidebar-inactive': staticMenuInactive && layoutMode === 'static',
-        'layout-overlay-sidebar-active': overlayMenuActive && layoutMode === 'overlay',
-        'layout-mobile-sidebar-active': mobileMenuActive,
-        'p-input-filled': inputStyle === 'filled',
-        'p-ripple-disabled': ripple === false,
-        'layout-theme-light': layoutColorMode === 'light'
+    const wrapperClass = classNames("layout-wrapper", {
+        "layout-overlay": layoutMode === "overlay",
+        "layout-static": layoutMode === "static",
+        "layout-static-sidebar-inactive": staticMenuInactive && layoutMode === "static",
+        "layout-overlay-sidebar-active": overlayMenuActive && layoutMode === "overlay",
+        "layout-mobile-sidebar-active": mobileMenuActive,
+        "p-input-filled": inputStyle === "filled",
+        "p-ripple-disabled": ripple === false,
+        "layout-theme-light": layoutColorMode === "light",
     });
 
     return (
         <div className={wrapperClass} onClick={onWrapperClick}>
             <Tooltip ref={copyTooltipRef} target=".block-action-copy" position="bottom" content="Copied to clipboard" event="focus" />
 
-            <AppTopbar onToggleMenuClick={onToggleMenuClick} layoutColorMode={layoutColorMode}
-                mobileTopbarMenuActive={mobileTopbarMenuActive} onMobileTopbarMenuClick={onMobileTopbarMenuClick} onMobileSubTopbarMenuClick={onMobileSubTopbarMenuClick} />
-
-            <div className="layout-sidebar" onClick={onSidebarClick}>
-                <AppMenu model={menu} onMenuItemClick={onMenuItemClick} layoutColorMode={layoutColorMode} />
-            </div>
+            <AppTopbar onToggleMenuClick={onToggleMenuClick} layoutColorMode={layoutColorMode} mobileTopbarMenuActive={mobileTopbarMenuActive} onMobileTopbarMenuClick={onMobileTopbarMenuClick} onMobileSubTopbarMenuClick={onMobileSubTopbarMenuClick} />
+            {token !== "" && token !== null && (
+                <div className="layout-sidebar" onClick={onSidebarClick}>
+                    <AppMenu model={rol == "Administrador" ? menu : menu2} onMenuItemClick={onMenuItemClick} layoutColorMode={layoutColorMode} />
+                </div>
+            )}
 
             <div className="layout-main-container">
                 <div className="layout-main">
-                    <Route path="/" exact render={() => <Dashboard colorMode={layoutColorMode} location={location} />} />
-                    <Route path="/crud-provincia" component={Crud} />
-                    <Route path="/crud-cuidad" component={CrudCuidad} />
-                    <Route path="/crud-sexo" component={CrudSexo} />
-                    <Route path="/crud-votantes" component={CrudVotantes} />
-                    <Route path="/crud-candidato" component={CrudCandidato} />
+                    <Switch>
+                        <Route path="/" exact component={Login} />
+                        <Route path="/dashboard" render={() => <Dashboard colorMode={layoutColorMode} location={location} />} />
+                        <Route path="/crud-provincia" component={Crud} />
+                        <Route path="/crud-cuidad" component={CrudCuidad} />
+                        <Route path="/crud-sexo" component={CrudSexo} />
+                        <Route path="/crud-usuario" component={CrudUsuarios} />
+                        <Route path="/crud-candidato" component={CrudCandidato} />
+                        <Route path="/crud-tipoInstitucion" component={CrudTipoInstituto} />
+                        <Route path="/crud-lista" component={Lista} />
+                        <Route path="/voto" component={Voto} />
+                        <Route path="/resultados" component={Resultados} />
+                        <Route path="/salir" component={Clear} />
+
+                        <Route path="*" component={Login} />
+                    </Switch>
                 </div>
 
                 <AppFooter layoutColorMode={layoutColorMode} />
             </div>
 
-            <AppConfig rippleEffect={ripple} onRippleEffect={onRipple} inputStyle={inputStyle} onInputStyleChange={onInputStyleChange}
-                layoutMode={layoutMode} onLayoutModeChange={onLayoutModeChange} layoutColorMode={layoutColorMode} onColorModeChange={onColorModeChange} />
+            <AppConfig rippleEffect={ripple} onRippleEffect={onRipple} inputStyle={inputStyle} onInputStyleChange={onInputStyleChange} layoutMode={layoutMode} onLayoutModeChange={onLayoutModeChange} layoutColorMode={layoutColorMode} onColorModeChange={onColorModeChange} />
 
             <CSSTransition classNames="layout-mask" timeout={{ enter: 200, exit: 200 }} in={mobileMenuActive} unmountOnExit>
                 <div className="layout-mask p-component-overlay"></div>
             </CSSTransition>
-
         </div>
     );
-
-}
+};
 
 export default App;

@@ -23,6 +23,7 @@
         "prismjs": "^1.28.0",
         "react": "^17.0.1",
         "react-app-polyfill": "^1.0.6",
+        "react-blob": "^2.1.0",
         "react-dom": "^17.0.1",
         "react-router-dom": "^5.2.0",
         "react-scripts": "^5.0.1",
@@ -46,6 +47,6 @@
         "not op_mini all"
     ],
     "devDependencies": {
-        "sass": "^1.54.8"
+        "sass": "^1.54.9"
     }
 }

@@ -8,7 +8,7 @@ import { Toolbar } from "primereact/toolbar";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 
-import { VotanteService } from "../service/VotanteService";
+import { UsuarioService } from "../service/UsuarioService";
 import { InstitucionService } from "../service/InstitucionService";
 import { GrupoService } from "../service/GrupoService";
 import { SexoService } from "../service/SexoService";
@@ -16,19 +16,18 @@ import { SexoService } from "../service/SexoService";
 import { Dropdown } from "primereact/dropdown";
 import { InputSwitch } from "primereact/inputswitch";
 import { FileUpload } from "primereact/fileupload";
-const CrudVotante = () => {
+const CrudUsuario = () => {
     let emptyProduct = {
-        id: null,   
+        id: null,
         nombre: "",
         apellido: "",
         cedula: "",
         correo: "",
-        celular: "",  
-        isActive: "",   
+        celular: "",
         institucion: null,
         grupo: "",
         sexo: "",
-        codigo:"",
+        codigo: "",
     };
 
     const [votantes, setvotantes] = useState(null);
@@ -37,18 +36,21 @@ const CrudVotante = () => {
     const [sexos, setsexos] = useState(null);
     const [codigo, setCodigo] = useState("");
 
+    const [institucionesSeleccionada, setinstitucionesSeleccionada] = useState(null);
+    const [gruposSeleccionada, setgruposSeleccionada] = useState(null);
+    const [sexosSeleccionada, setsexosSeleccionada] = useState(null);
+    const [codigoSeleccionada, setCodigoSeleccionada] = useState("");
 
     const [votantesDialog, setVotantesDialog] = useState(false);
     const [deleteVotanteDialog, setDeleteVotanteDialog] = useState(false);
     const [deleteVotantesDialog, setDeleteVotantesDialog] = useState(false);
 
-    const [votante, setVotante] = useState(emptyProduct);  
+    const [votante, setVotante] = useState(emptyProduct);
     const [institucion, setinstitucion] = useState(null);
-    const [grupo, setGrupo] = useState(null);  
-    const [sexo, setSexo] = useState(null); 
+    const [grupo, setGrupo] = useState(null);
+    const [sexo, setSexo] = useState(null);
     const [activo, setActivo] = useState(false);
     const [activeCedula, setActiveCedula] = useState(true);
-
 
     const [selectedvotantes, setSelectedvotantes] = useState(null);
 
@@ -63,46 +65,24 @@ const CrudVotante = () => {
 
     const data = JSON.parse(window.localStorage.getItem("institucion"));
     useEffect(() => {
-      /*  const candService = new VotanteService();
-        candService.getVotante().then((data) => setvotantes(data));
+        const candService = new UsuarioService();
+        candService.getUsuarios().then((data) => setvotantes(data));
 
         const institucion = new InstitucionService();
-        institucion.getInstituciones(setinstituciones)
+        institucion.getInstituciones(setinstituciones);
 
-        const grupo= new GrupoService();
+        const grupo = new GrupoService();
         grupo.getGrupos(setgrupos);
 
         const sexo = new SexoService();
-        sexo.getSexo(setsexos);
-
-    }, []);*/
-
-    if (data) {
-        const votanteService = new VotanteService();
-        votanteService.getVotantes(data.ruc, setvotantes).then((res) => {
-            if (res === 401) {
-                window.localStorage.removeItem("institucion");
-                
-            }
-        });
-        const institucionService = new InstitucionService();
-        institucionService.getInstitucion(data.ruc, setinstitucion);
-        const grupoService = new GrupoService();
-        grupoService.getGrupos(data.ruc, setGrupo);
-        const sexoService = new SexoService();
-        sexoService.getSexos(setSexo);
-    } else {
-        
-    }
-}, []);
-
-
+        sexo.getSexo().then((data) => setsexos(data));
+    }, []);
 
     const openNew = () => {
         setVotante(emptyProduct);
-        setinstitucion({});
-        setGrupo({});
-        setSexo({});
+        setinstitucionesSeleccionada(null);
+        setgruposSeleccionada(null);
+        setsexosSeleccionada(null);
         setSubmittedInstitucion(false);
         setSubmittedGrupo(false);
         setSubmittedSexo(false);
@@ -116,8 +96,6 @@ const CrudVotante = () => {
         setVotantesDialog(false);
         setSubmittedGrupo(false);
         setSubmittedSexo(false);
-
-      
     };
 
     const hideDeleteProductDialog = () => {
@@ -131,36 +109,64 @@ const CrudVotante = () => {
     const saveVotante = () => {
         setSubmitted(true);
 
-        const votanteService = new VotanteService();
-        votante.institucion = institucion;
-        votante.activo = activo;
-        votante.grupo = grupo;
-        votante.sexo = sexo;
-        votante.codigo = codigo;
-
         if (votante.nombre.trim()) {
             let _votantes = [...votantes];
             let _votante = { ...votante };
             if (votante.id) {
-                console.log(votante);
-                votanteService.updateVotante(votante).then((res) => {
-                    if (res === 401) {
-                        window.localStorage.removeItem("institucion");
-                   
-                    }
-                });
                 const index = findIndexById(votante.id);
+
                 _votantes[index] = _votante;
-                toast.current.show({ severity: "success", summary: "Successful", detail: "votante Updated", life: 3000 });
-            } else {
-                votanteService.postVotante(votante).then((res) => {
-                    if (res === 401) {
-                        window.localStorage.removeItem("institucion");
-                      
-                    }
+
+                const votantesServicio = new UsuarioService();
+                const newEstado = {
+                    ..._votante,
+                    grupo: gruposSeleccionada,
+                    institucion: institucionesSeleccionada,
+                    sexo: sexosSeleccionada,
+                };
+                votantesServicio.updateUsuarios(newEstado).then(() => {
+                    votantesServicio.getUsuarios().then((data) => setvotantes(data));
+                    toast.current.show({
+                        severity: "success",
+                        summary: "Successful",
+                        detail: "Usuario Actualizado",
+                        life: 3000,
+                    });
                 });
-                _votantes.push(_votante);
-                toast.current.show({ severity: "success", summary: "Successful", detail: "votante Created", life: 3000 });
+            } else {
+                const votantesServicio = new UsuarioService();
+                const newEstado = {
+                    ..._votante,
+                    grupo: gruposSeleccionada,
+                    institucion: institucionesSeleccionada,
+                    sexo: sexosSeleccionada,
+                    codigo: codigo,
+                    activo: true,
+                    password: votante.cedula,
+                    rol: {
+                        id: 2,
+                        nombre: "User",
+                    },
+                };
+                votantesServicio
+                    .postUsuarios(newEstado)
+                    .then(() => {
+                        votantesServicio.getUsuarios().then((data) => setvotantes(data));
+                        toast.current.show({
+                            severity: "success",
+                            summary: "Successful",
+                            detail: "Usuario Creado",
+                            life: 3000,
+                        });
+                    })
+                    .catch((error) => {
+                        toast.current.show({
+                            severity: "error",
+                            summary: "Successful",
+                            detail: "El Usuario Ya existe ",
+                            life: 3000,
+                        });
+                    });
             }
 
             setCodigo("");
@@ -172,10 +178,9 @@ const CrudVotante = () => {
 
     const editProduct = (votante) => {
         setCodigo(votante.codigo);
-        setActiveCedula(false);
-        setGrupo(votante.grupo);
-        setSexo(votante.sexo);
-        setActivo(votante.activo);
+        setinstitucionesSeleccionada(votante.institucion);
+        setgruposSeleccionada(votante.grupo);
+        setsexosSeleccionada(votante.sexo);
         setVotante({ ...votante });
         setVotantesDialog(true);
     };
@@ -184,16 +189,14 @@ const CrudVotante = () => {
         setVotante(votante);
         setDeleteVotanteDialog(true);
     };
-   
 
     const deleteProduct = () => {
-        const votanteService = new VotanteService();
+        const votanteService = new UsuarioService();
         let _votantes;
         votanteService.deleteVotante(votante.id).then((res) => {
             if (res === 500) {
                 toast.current.show({ severity: "error", summary: "Error Message", detail: "votante no eliminada", life: 3000 });
             } else if (res === 401) {
-                
                 window.localStorage.removeItem("institucion");
             } else {
                 _votantes = votantes.filter((val) => val.id !== votante.id);
@@ -226,7 +229,7 @@ const CrudVotante = () => {
     };
 
     const deleteSelectedProducts = () => {
-        const votanteService = new VotanteService();
+        const votanteService = new UsuarioService();
         let _votantes;
         selectedvotantes.map((res) =>
             votanteService.deleteVotante(res.id).then((res) => {
@@ -234,7 +237,6 @@ const CrudVotante = () => {
                     toast.current.show({ severity: "error", summary: "Error Message", detail: "votantes no eliminadas", life: 3000 });
                 } else if (res === 401) {
                     window.localStorage.removeItem("institucion");
-                   
                 } else {
                     _votantes = votantes.filter((val) => !selectedvotantes.includes(val));
                     setvotantes(_votantes);
@@ -254,29 +256,15 @@ const CrudVotante = () => {
         setVotante(_product);
     };
 
-  
-
     const leftToolbarTemplate = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
                     <Button label="Nuevo" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
-                    <Button label="Delete" icon="pi pi-trash" className="p-button-danger" onClick={confirmDeleteSelected} disabled={!selectedvotantes || !selectedvotantes.length} />
                 </div>
             </React.Fragment>
         );
     };
-
-
-    const rightToolbarTemplate = () => {
-        return (
-            <React.Fragment>
-                <FileUpload mode="basic" accept="image/*" maxFileSize={1000000} label="Import" chooseLabel="Import" className="mr-2 inline-block" />
-                <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />
-            </React.Fragment>
-        );
-    };
-
 
     const idBodyTemplate = (rowData) => {
         return (
@@ -286,7 +274,6 @@ const CrudVotante = () => {
             </>
         );
     };
-
 
     const nombreBodyTemplate = (rowData) => {
         return (
@@ -305,7 +292,6 @@ const CrudVotante = () => {
             </>
         );
     };
-
 
     const cedulaBodyTemplate = (rowData) => {
         return (
@@ -337,7 +323,7 @@ const CrudVotante = () => {
         return (
             <>
                 <span className="p-column-title">institucion</span>
-                {rowData.institucion.institucion}
+                {rowData.institucion.nombre}
             </>
         );
     };
@@ -346,7 +332,7 @@ const CrudVotante = () => {
         return (
             <>
                 <span className="p-column-title">grupo</span>
-                {rowData.grupo.grupo}
+                {rowData.grupo.nombre}
             </>
         );
     };
@@ -354,11 +340,10 @@ const CrudVotante = () => {
         return (
             <>
                 <span className="p-column-title">sexo</span>
-                {rowData.sexo.sexo}
+                {rowData.sexo.nombre}
             </>
         );
     };
-
 
     const codigoBodyTemplate = (rowData) => {
         return (
@@ -369,13 +354,11 @@ const CrudVotante = () => {
         );
     };
 
-
     const handleCodigo = (e) => {
-        const votanteService = new VotanteService();
-        votanteService.getCodigo(institucion.id).then((res) => setCodigo(res));
+        const date = new Date();
+        const codigo = date.getFullYear() + "" + date.getMonth() + "" + date.getDay() + "" + date.getHours() + "" + date.getMinutes() + "" + date.getSeconds() + "" + date.getMilliseconds();
+        setCodigo(codigo);
     };
-
-
 
     const actionBodyTemplate = (rowData) => {
         return (
@@ -387,17 +370,16 @@ const CrudVotante = () => {
     };
 
     const onInstitucionChange = (e) => {
-        setinstitucion(e.value);
+        setinstitucionesSeleccionada(e.value);
     };
 
     const onGrupoChange = (e) => {
-        setgrupos(e.value);
+        setgruposSeleccionada(e.value);
     };
 
     const onSexoChange = (e) => {
-        setsexos(e.value);
+        setsexosSeleccionada(e.value);
     };
-
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
@@ -428,15 +410,12 @@ const CrudVotante = () => {
         </>
     );
 
-
-
     return (
         <div className="grid crud-demo">
             <div className="col-12">
                 <div className="card">
                     <Toast ref={toast} />
-                    <Toolbar className="mb-4" left={leftToolbarTemplate}>right={rightToolbarTemplate}></Toolbar>
-
+                    <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}
                         value={votantes}
@@ -462,106 +441,51 @@ const CrudVotante = () => {
                         <Column field="celular" header="Celular" body={celularBodyTemplate} headerStyle={{ width: "14%", minWidth: "10rem" }}></Column>
                         <Column field="grupo" header="Grupo" body={grupoBodyTemplate} headerStyle={{ width: "14%", minWidth: "10rem" }}></Column>
                         <Column field="institucion" header="Institucion" body={institucionBodyTemplate} headerStyle={{ width: "14%", minWidth: "10rem" }}></Column>
-               
+
                         <Column field="sexo" header="Sexo" body={sexoBodyTemplate} headerStyle={{ width: "14%", minWidth: "10rem" }}></Column>
                         <Column field="codigo" header="Codigo" body={codigoBodyTemplate} headerStyle={{ width: "14%", minWidth: "10rem" }}></Column>
                         <Column body={actionBodyTemplate}></Column>
-                    </DataTable> 
-                        
-                    <Dialog visible={votantesDialog} style={{ width: "450px" }} header="Votante" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>                   
+                    </DataTable>
 
-                    <div className="field">
-                            <label htmlFor="name">Nombre </label>
-                            <InputText
-                                id="nombre"
-                                value={votante.nombre}
-                                onChange={(e) => onInputChange(e, "nombre")}
-                                required
-                                autoFocus
-                                className={classNames({
-                                    "p-invalid": submitted && !votantes.nombre
-                                })}
-                            />
-                            {submitted && !votantes.nombre && <small className="p-invalid">El nombre es requerido.</small>}
- 
-                            <label htmlFor="name">Apellido </label>
-                            <InputText
-                                id="apellido"
-                                value={votante.apellido}
-                                onChange={(e) => onInputChange(e, "apellido")}
-                                required
-                                autoFocus
-                                className={classNames({
-                                    "p-invalid": submitted && !votantes.apellido
-                                })}
-                            />
-                            {submitted && !votantes.apellido && <small className="p-invalid">El apellido es requerido.</small>}
-            
-                            <label htmlFor="name">cedula </label>
-                            <InputText
-                                id="cedula"
-                                value={votante.cedula}
-                                onChange={(e) => onInputChange(e, "cedula")}
-                                required
-                                autoFocus
-                                className={classNames({
-                                    "p-invalid": submitted && !votantes.cedula
-                                })}
-                            />
-                            {submitted && !votantes.cedula && <small className="p-invalid">La cedula es requerida.</small>}        
-                            <label htmlFor="name">Correo </label>
-                            <InputText
-                                id="correo"
-                                value={votante.correo}
-                                onChange={(e) => onInputChange(e, "correo")}
-                                required
-                                autoFocus
-                                className={classNames({
-                                    "p-invalid": submitted && !votantes.correo
-                                })}
-                            />
-                            {submitted && !votantes.correo && <small className="p-invalid">El correo es requerido.</small>}
-                            <label htmlFor="name">Celular </label>
-                            <InputText
-                                id="celular"
-                                value={votante.celular}
-                                onChange={(e) => onInputChange(e, "celular")}
-                                required
-                                autoFocus
-                                className={classNames({
-                                    "p-invalid": submitted && !votantes.celular
-                                })}
-                            />
-                            {submitted && !votantes.celular && <small className="p-invalid">El celular es requerido.</small>}
-                            
-                            <div className="field ">
-                            <label htmlFor="codigo">Codigo--</label>
-                            <label htmlFor="codigo">{codigo}</label>
-                            <Button label="Gemerar codigo" icon="pi pi-plus" className="p-button-success mr-2" onClick={handleCodigo} />
-                        </div>
+                    <Dialog visible={votantesDialog} style={{ width: "450px" }} header="Votante" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
                         <div className="field">
-                            <InputSwitch checked={activo} onChange={(e) => setActivo(e.value)} color="primary" name="status" />
+                            <label htmlFor="name">Nombre </label>
+                            <InputText id="nombre" value={votante.nombre} onChange={(e) => onInputChange(e, "nombre")} required autoFocus />
+
+                            <label htmlFor="name">Apellido </label>
+                            <InputText id="apellido" value={votante.apellido} onChange={(e) => onInputChange(e, "apellido")} required autoFocus />
+
+                            <label htmlFor="name">cedula </label>
+                            <InputText id="cedula" value={votante.cedula} onChange={(e) => onInputChange(e, "cedula")} required autoFocus />
+                            {submitted && !votantes.cedula && <small className="p-invalid">La cedula es requerida.</small>}
+                            <label htmlFor="name">Correo </label>
+                            <InputText id="correo" value={votante.correo} onChange={(e) => onInputChange(e, "correo")} required autoFocus />
+                            <label htmlFor="name">Celular </label>
+                            <InputText id="celular" value={votante.celular} onChange={(e) => onInputChange(e, "celular")} required autoFocus />
+
+                            <div className="field ">
+                                <label htmlFor="codigo">Codigo--</label>
+                                <label htmlFor="codigo">{codigo}</label>
+                                <Button label="Gemerar codigo" icon="pi pi-plus" className="p-button-success mr-2" onClick={handleCodigo} />
+                            </div>
+                            <label htmlFor="votante">Institucion</label>
+                            <Dropdown id="name" value={institucionesSeleccionada} required options={instituciones} onChange={onInstitucionChange} optionLabel="nombre" placeholder="Selecione la institucion" />
                         </div>
 
-                            <Dropdown id="name"value={institucion} required options={instituciones} onChange={onInstitucionChange} optionLabel="nombre" placeholder="Selecione la institucion" className={classNames({ "p-invalid": submittedInstitucion && !institucion.nombre })} />
-                            {submittedInstitucion && !institucion.nombre && <small className="p-invalid">Es requerido</small>}
-                         </div>
-                         <p/>        
-                         <div>
-                            <Dropdown id="name" value={grupo} required options={grupos} onChange={onGrupoChange} optionLabel="nombre" placeholder="Selecione un grupo" className={classNames({ "p-invalid": submittedInstitucion && !grupo.nombre })} />
+                        <p />
+                        <div>
+                            <Dropdown id="name" value={gruposSeleccionada} required options={grupos} onChange={onGrupoChange} optionLabel="nombre" placeholder="Selecione un grupo" className={classNames({ "p-invalid": submittedInstitucion && !grupo.nombre })} />
                             {submittedGrupo && !grupo.nombre && <small className="p-invalid">Es requerido </small>}
-                         </div>
+                        </div>
 
-                         <p/>        
-                         <div>
-                            <Dropdown id="name" value={sexo} required options={sexos} onChange={onSexoChange} optionLabel="nombre" placeholder="Selecione un sexo" className={classNames({ "p-invalid": submittedSexo && !sexo.nombre })} />
+                        <p />
+                        <div>
+                            <Dropdown id="name" value={sexosSeleccionada} required options={sexos} onChange={onSexoChange} optionLabel="nombre" placeholder="Selecione un sexo" className={classNames({ "p-invalid": submittedSexo && !sexo.nombre })} />
                             {submittedSexo && !sexo.nombre && <small className="p-invalid">Es requerido </small>}
-                         </div>
-
-
+                        </div>
                     </Dialog>
 
-                 <Dialog visible={deleteVotanteDialog} style={{ width: "450px" }} header="Confirm" modal footer={deleteProductDialogFooter} onHide={hideDeleteProductDialog}>
+                    <Dialog visible={deleteVotanteDialog} style={{ width: "450px" }} header="Confirm" modal footer={deleteProductDialogFooter} onHide={hideDeleteProductDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: "2rem" }} />
                             {votantes && (
@@ -588,4 +512,4 @@ const comparisonFn = function (prevProps, nextProps) {
     return prevProps.location.pathname === nextProps.location.pathname;
 };
 
-export default React.memo(CrudVotante, comparisonFn);
+export default React.memo(CrudUsuario, comparisonFn);

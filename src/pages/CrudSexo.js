@@ -20,7 +20,7 @@ const CrudSexo = () => {
     const [deleteSexoDialog, setDeleteSexoDialog] = useState(false);
     const [deleteSexosDialog, setDeleteSexosDialog] = useState(false);
 
-  const [sexo, setSexo] = useState(emptyProduct);  
+    const [sexo, setSexo] = useState(emptyProduct);
 
     const [selectedSexo, setSelectedSexos] = useState(null);
     const [submitted, setSubmitted] = useState(false);
@@ -32,8 +32,6 @@ const CrudSexo = () => {
         const sexService = new SexoService();
         sexService.getSexo().then((data) => setSexos(data));
     }, []);
-
-    
 
     const openNew = () => {
         setSexo(emptyProduct);
@@ -54,8 +52,6 @@ const CrudSexo = () => {
         setDeleteSexosDialog(false);
     };
 
-
-
     const saveProduct = () => {
         setSubmitted(true);
 
@@ -67,7 +63,7 @@ const CrudSexo = () => {
 
                 _products[index] = _product;
                 const sexoservice = new SexoService();
-                sexoservice.putSexo(_product); 
+                sexoservice.putSexo(_product);
                 toast.current.show({
                     severity: "success",
                     summary: "Successful",
@@ -75,13 +71,12 @@ const CrudSexo = () => {
                     life: 3000,
                 });
             } else {
-
-                const sexoService=new SexoService();
-               sexoService.postSexo(_product)
-             /*   _product.id = createId();
+                const sexoService = new SexoService();
+                sexoService.postSexo(_product);
+                /*   _product.id = createId();
                   _product.image = "product-placeholder.svg";
                 _products.push(_product);*/
-                
+
                 toast.current.show({
                     severity: "success",
                     summary: "Successful",
@@ -111,7 +106,7 @@ const CrudSexo = () => {
         setSexo(_products);
         setDeleteSexoDialog(false);
         setSexo(emptyProduct);
-        const  sexService= new SexoService();
+        const sexService = new SexoService();
         sexService.deleteSexo(sexos.id);
 
         toast.current.show({
@@ -134,7 +129,6 @@ const CrudSexo = () => {
         return index;
     };
 
-
     const deleteSelectedProducts = () => {
         let _products = sexos.filter((val) => !selectedSexo.includes(val));
         setDeleteSexoDialog(_products);
@@ -155,8 +149,6 @@ const CrudSexo = () => {
 
         setSexo(_product);
     };
-
-  
 
     const leftToolbarTemplate = () => {
         return (
@@ -253,7 +245,7 @@ const CrudSexo = () => {
                         <Column body={actionBodyTemplate}></Column>
                     </DataTable>
 
-                    <Dialog visible={sexosDialog} style={{ width: "450px" }} header="Provincia" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>                   
+                    <Dialog visible={sexosDialog} style={{ width: "450px" }} header="Provincia" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
                         <div className="field">
                             <label htmlFor="name">Nombre </label>
                             <InputText
@@ -263,12 +255,11 @@ const CrudSexo = () => {
                                 required
                                 autoFocus
                                 className={classNames({
-                                    "p-invalid": submitted && !sexos.nombre
+                                    "p-invalid": submitted && !sexos.nombre,
                                 })}
                             />
                             {submitted && !sexos.nombre && <small className="p-invalid">El nombre es requerido.</small>}
                         </div>
-                       
                     </Dialog>
                     <Dialog visible={deleteSexoDialog} style={{ width: "450px" }} header="Confirm" modal footer={deleteProductDialogFooter} onHide={hideDeleteProductDialog}>
                         <div className="flex align-items-center justify-content-center">
@@ -298,5 +289,3 @@ const comparisonFn = function (prevProps, nextProps) {
 };
 
 export default React.memo(CrudSexo, comparisonFn);
-
-

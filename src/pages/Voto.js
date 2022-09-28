@@ -11,13 +11,16 @@ import { FileUpload } from "primereact/fileupload";
 import { Dropdown } from "primereact/dropdown";
 import { InputSwitch } from "primereact/inputswitch";
 import { ListaService } from "../service/ListaService";
+import { Splitter, SplitterPanel } from "primereact/splitter";
 import { ProcesoService } from "../service/ProcesoService";
 import { UsuarioService } from "../service/UsuarioService";
 import { TipoCandidatoService } from "../service/TipoCandidatoService";
 import { CandidatoService } from "../service/CandidatoService";
 import { Image } from "primereact/image";
+import { VotoService } from "../service/VotoService";
+import { useHistory } from "react-router-dom";
 
-const CrudCandidato = () => {
+const Voto = () => {
     let emptyCandidato = {
         id: null,
         usuario: null,
@@ -28,7 +31,10 @@ const CrudCandidato = () => {
     };
 
     const [candidato, setCandidato] = useState(emptyCandidato);
+    const [votante, setVotante] = useState(null);
     const [candidatos, setCandidatos] = useState(null);
+    const [listaPresidente, setListaPresidente] = useState(null);
+    const [listaVicepresidente, setListaVicepresidente] = useState(null);
 
     const [listaSeleccionado, setListaSeleccionado] = useState(null);
     const [procesoSeleccionado, setProcesoSeleccionado] = useState(null);
@@ -53,22 +59,26 @@ const CrudCandidato = () => {
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null);
     const dt = useRef(null);
+    const redirect = useHistory();
 
     useEffect(() => {
         const candidatoService = new CandidatoService();
-        candidatoService.getCandidato().then((data) => setCandidatos(data));
+        candidatoService.getCandidato().then((data) => {
+            const listap = data.filter((x) => x.tipoCandidato.nombre === "Presidente");
+            setListaPresidente(listap);
 
-        const votantesService = new UsuarioService();
-        votantesService.getUsuarios().then((data) => setVotantes(data));
+            const usuarioService = new UsuarioService();
+            const result2 = usuarioService.getLogin();
+            result2.then((result) => {
+                setVotante(result.data);
+            });
+        });
 
         const tiposCandidatoService = new TipoCandidatoService();
         tiposCandidatoService.getTipoCandidato().then((data) => setTipoCandidatos(data));
 
         const listaService = new ListaService();
         listaService.getLista().then((data) => setListas(data));
-
-        const procesoService = new ProcesoService();
-        procesoService.getProcesos().then((data) => setProcesos(data));
     }, []);
 
     const openNew = () => {
@@ -96,32 +106,31 @@ const CrudCandidato = () => {
     const hideDeleteProductsDialog = () => {
         setDeleteCandidatosDialog(false);
     };
-    const saveCandidato = () => {
+    const saveVoto = () => {
         setSubmitted(true);
-        let _candidatos = [...candidatos];
+        let _candidatos = {};
         let _candidato = { ...candidato };
         if (candidato.id) {
-            const index = findIndexById(candidato.id);
-
-            _candidatos[index] = _candidato;
-
-            const candidatoServicio = new CandidatoService();
+            console.log(_candidato);
+            const fecha = new Date().toISOString().slice(0, 19).replace("T", " ");
+            const fecha2 = new Date(fecha);
+            const votoService = new VotoService();
+            const { accountNonLocked, authorities, credentialsNonExpired, enabled, username, ...resto } = votante;
             const newEstado = {
-                ..._candidato,
-                lista: listaSeleccionado,
-                procesoEleccion: procesoSeleccionado,
-                tipoCandidato: tipoCandidatoSeleccionado,
-                votante: votanteSeleccionado,
-                imagen: imagen,
+                fechaRegistro: fecha2,
+                lista: _candidato.lista,
+                procesoEleccion: _candidato.procesoEleccion,
+                votante: resto,
             };
-            candidatoServicio.updateCandidato(newEstado).then(() => {
-                candidatoServicio.getCandidato().then((data) => setCandidatos(data));
-                toast.current.show({
-                    severity: "success",
-                    summary: "Successful",
-                    detail: "Candidato Actualizado",
-                    life: 3000,
-                });
+            votoService.postVoto(newEstado).then(() => {});
+
+            const votantesServicio = new UsuarioService();
+            const newEstado2 = {
+                ...resto,
+                activo: true,
+            };
+            votantesServicio.updateUsuarios(newEstado2).then(() => {
+                redirect.push("/salir");
             });
         } else {
             const candidatoServicio = new CandidatoService();
@@ -150,13 +159,13 @@ const CrudCandidato = () => {
     };
     const editProduct = (product) => {
         setCandidato({ ...product });
-        setImagen(product.imagen);
-        setProcesoSeleccionado(product.procesoEleccion);
-        setListaSeleccionado(product.lista);
-        setTipoCandidatoSeleccionado(product.tipoCandidato);
-        setVotanteSeleccionado(product.votante);
-        setActivo(product.activo);
         setCandidatosDialog(true);
+        const candidatoService = new CandidatoService();
+        candidatoService.getCandidato().then((data) => {
+            const listavp = data.filter((x) => x.tipoCandidato.nombre === "Vicepresidente");
+            const l1 = listavp.filter((x) => x.lista.nombre === product.lista.nombre);
+            setListaVicepresidente(l1[0]);
+        });
     };
 
     const confirmDeleteProduct = (product) => {
@@ -233,25 +242,6 @@ const CrudCandidato = () => {
         setVotanteSeleccionado(e.value);
     };
 
-    const leftToolbarTemplate = () => {
-        return (
-            <React.Fragment>
-                <div className="my-2">
-                    <Button label="Nuevo" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
-                </div>
-            </React.Fragment>
-        );
-    };
-
-    const idBodyTemplate = (rowData) => {
-        return (
-            <>
-                <span className="p-column-title">Code</span>
-                {rowData.id}
-            </>
-        );
-    };
-
     const blobToImage = (blob) => {
         let imagen = new Image();
         imagen.src = `data:image/jpg;base64,${blob}`;
@@ -263,7 +253,16 @@ const CrudCandidato = () => {
         return (
             <>
                 <span className="p-column-title">logo</span>
-                <img src={blobToImage(rowData.imagen).src} alt={rowData.imagen} className="shadow-2" width="80" />
+                <img src={blobToImage(rowData.imagen).src} alt={rowData.imagen} className="shadow-2" width="100" />
+            </>
+        );
+    };
+    const imagenBodyTemplate = (rowData) => {
+        blobToImage(rowData.imagen);
+        return (
+            <>
+                <span className="p-column-title">logo</span>
+                <img src={blobToImage(rowData.lista.logo).src} alt={rowData.imagen} className="shadow-2" width="100" />
             </>
         );
     };
@@ -307,8 +306,7 @@ const CrudCandidato = () => {
     const actionBodyTemplate = (rowData) => {
         return (
             <div className="actions">
-                <Button icon="pi pi-pencil" className="p-button-rounded p-button-success mr-2" onClick={() => editProduct(rowData)} />
-                <Button icon="pi pi-trash" className="p-button-rounded p-button-warning mt-2" onClick={() => confirmDeleteProduct(rowData)} />
+                <Button icon="pi pi-send" onClick={() => editProduct(rowData)} label="Votar" />
             </div>
         );
     };
@@ -329,8 +327,8 @@ const CrudCandidato = () => {
 
     const productDialogFooter = (
         <>
-            <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog} />
-            <Button label="Guardar" icon="pi pi-check" className="p-button-text" onClick={saveCandidato} />
+            <Button label="Cancelar" icon="pi pi-times" className="p-button-danger" onClick={hideDialog} />
+            <Button label="Votar" icon="pi pi-check" className="p-button-success" onClick={saveVoto} />
         </>
     );
     const deleteProductDialogFooter = (
@@ -375,10 +373,9 @@ const CrudCandidato = () => {
             <div className="col-12">
                 <div className="card">
                     <Toast ref={toast} />
-                    <Toolbar className="mb-4" left={leftToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}
-                        value={candidatos}
+                        value={listaPresidente}
                         selection={selectedCandidatos}
                         onSelectionChange={(e) => setSelectedCandidatos(e.value)}
                         dataKey="id"
@@ -392,55 +389,36 @@ const CrudCandidato = () => {
                         header={header}
                         responsiveLayout="scroll"
                     >
-                        <Column selectionMode="multiple" headerStyle={{ width: "3rem" }}></Column>
-                        <Column field="id" header="Id" body={idBodyTemplate} headerStyle={{ width: "14%", minWidth: "10rem" }}></Column>
-                        <Column field="imagen" header="Imagen" body={logoBodyTemplate} headerStyle={{ width: "14%", minWidth: "10rem" }}></Column>
                         <Column field="lista" header="Lista" body={listaBodyTemplate} headerStyle={{ width: "14%", minWidth: "10rem" }}></Column>
-                        <Column field="proceso" header="Proceso" body={procesoBodyTemplate} headerStyle={{ width: "14%", minWidth: "10rem" }}></Column>
+                        <Column field="imagen" header="Logo" body={imagenBodyTemplate} headerStyle={{ width: "14%", minWidth: "10rem" }}></Column>
+                        <Column field="candidato" header="Candidato" body={logoBodyTemplate} headerStyle={{ width: "14%", minWidth: "10rem" }}></Column>
                         <Column field="tipoCandidato" header="Tipo De Candidato" body={tipoCandidatoBodyTemplate} headerStyle={{ width: "14%", minWidth: "10rem" }}></Column>
-                        <Column field="votante" header="Votante" body={votanteBodyTemplate} headerStyle={{ width: "14%", minWidth: "10rem" }}></Column>
-                        <Column body={actionBodyTemplate}></Column>
+                        <Column body={actionBodyTemplate} headerStyle={{ width: "14%", minWidth: "10rem" }}></Column>
                     </DataTable>
 
-                    <Dialog visible={candidatosDialog} style={{ width: "450px" }} header="Votante" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
+                    <Dialog visible={candidatosDialog} style={{ width: "450px" }} header="Confirmacion" modal className="p-fluid" footer={productDialogFooter} onHide={hideDialog}>
                         <div className="field">
-                            <label htmlFor="lista">Lista</label>
-                            <Dropdown value={listaSeleccionado} options={listas} onChange={onListaChange} optionLabel="nombre" placeholder="Seleccione una Lista" required />
+                            <h2 className="text-center"> {candidato.lista !== null ? candidato.lista.nombre : ""}</h2>
                         </div>
-                        <div className="field">
-                            <label htmlFor="proceso">Proceso</label>
-                            <Dropdown value={procesoSeleccionado} options={procesos} onChange={onProcesoChange} optionLabel="nombreproceso" placeholder="Seleccione un Proceso" required />
-                        </div>
-                        <div className="field">
-                            <label htmlFor="tipoCandidato">Tipo de Candidato</label>
-                            <Dropdown value={tipoCandidatoSeleccionado} options={tipoCandidatos} onChange={onTipoCandidatoChange} optionLabel="nombre" placeholder="Seleccione un Tipo de Candidato" required />
-                        </div>
-                        <div className="field">
-                            <label htmlFor="votante">Votante</label>
-                            <Dropdown value={votanteSeleccionado} options={votantes} onChange={onVotanteChange} optionLabel="nombre" placeholder="Seleccione un Votante" required />
-                        </div>
-                        <div className="field">
-                            <label htmlFor="imagen">Imagen </label>
-                            <FileUpload id="imagen" name="imagen" accept="image/*" onSelect={(e) => onImageChange(e, "imagen")} mode="basic" />
-                        </div>
-                    </Dialog>
-
-                    <Dialog visible={deleteCandidatoDialog} style={{ width: "450px" }} header="Confirm" modal footer={deleteProductDialogFooter} onHide={hideDeleteProductDialog}>
-                        <div className="flex align-items-center justify-content-center">
-                            <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: "2rem" }} />
-                            {candidatos && (
-                                <span>
-                                    Are you sure you want to delete <b>{candidatos.nombre}</b>?
-                                </span>
-                            )}
-                        </div>
-                    </Dialog>
-
-                    <Dialog visible={deleteCandidatosDialog} style={{ width: "450px" }} header="Confirm" modal footer={deleteProductsDialogFooter} onHide={hideDeleteProductsDialog}>
-                        <div className="flex align-items-center justify-content-center">
-                            <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: "2rem" }} />
-                            {candidatos && <span>Are you sure you want to delete the selected products?</span>}
-                        </div>
+                        <Splitter className="mb-5">
+                            <SplitterPanel className="flex align-items-center justify-content-center">
+                                <div className="field-col">
+                                    <label htmlFor="proceso">Presidente</label>
+                                    <div>
+                                        <img src={blobToImage(candidato.imagen).src} alt={candidato.imagen} className="shadow-2" width="100%" />
+                                    </div>
+                                </div>
+                            </SplitterPanel>
+                            <SplitterPanel className="flex align-items-center justify-content-center">
+                                {" "}
+                                <div className="field-col">
+                                    <label htmlFor="proceso">Vicepresidente</label>
+                                    <div>
+                                        <img src={listaVicepresidente !== null ? blobToImage(listaVicepresidente.imagen).src : ""} className="shadow-2" width="100%" />
+                                    </div>
+                                </div>
+                            </SplitterPanel>
+                        </Splitter>
                     </Dialog>
                 </div>
             </div>
@@ -452,4 +430,4 @@ const comparisonFn = function (prevProps, nextProps) {
     return prevProps.location.pathname === nextProps.location.pathname;
 };
 
-export default React.memo(CrudCandidato, comparisonFn);
+export default React.memo(Voto, comparisonFn);
